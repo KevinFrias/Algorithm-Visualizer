@@ -8,6 +8,7 @@ import networkx as nx
 import sys
 import atexit
 import threading
+import time
 
 ## Algoritmos a incluir : 
 ## > Flujo maximo
@@ -71,6 +72,9 @@ def iniciar_flujo(adj, inicial, final):
         window.destroy()
         return ''
 
+    dibujar_grafo(adj)
+    time.sleep(5)
+
     limpiar_pantalla()
 
     # Creamos el grafp
@@ -97,22 +101,22 @@ def obtener_grafo(s, opcion):
 
         # Creamos la entiqueta y el campo de entrada para el nodo inicial
         nodoInicial_label = tk.Label(window, text="Nodo inicial :", font='helvetica 20')
-        nodoInicial_entry = tk.Entry(window)
+        nodoInicial_entry = tk.Entry(window, font=('Georgia 20'))
 
         # -> padx(left, right)
         # -> pady(top, bottom)
 
         # Los agregamos a pantalla
         nodoInicial_label.pack(pady=(50,0)) 
-        nodoInicial_entry.pack(padx=(100,100), pady=(10,100))
+        nodoInicial_entry.pack(padx=(100,100), pady=(10,50))
 
         # Creamos la entiqueta y el campo de entrada para el nodo final
         nodoFinal_label = tk.Label(window, text="Nodo final :", font='helvetica 20')
-        nodoFinal_entry = tk.Entry(window)
+        nodoFinal_entry = tk.Entry(window, font=('Georgia 20'))
 
         # Los agregamos a pantalla
         nodoFinal_label.pack()
-        nodoFinal_entry.pack(padx=(100,100), pady=(10,100))
+        nodoFinal_entry.pack(padx=(100,100), pady=(10,50))
 
         # Creamos el boton para iniciar con el algoritmo
         confirmar_boton = tk.Button(window, width=35, height=3, text="Iniciar", command=lambda:iniciar_flujo(adj, nodoInicial_entry.get(), nodoFinal_entry.get()))
