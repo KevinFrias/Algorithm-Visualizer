@@ -18,6 +18,6 @@ def crear_adjList(entrada):
             else :
                 b.append(int(a[1][j]))
 
-        adj[a[0]] = b
+        adj[int(a[0])] = b
 
     return adj 

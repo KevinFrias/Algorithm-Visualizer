@@ -1,9 +1,15 @@
 import tkinter as tk
 import helping_functions as hf
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+import matplotlib.pyplot as plt
+import matplotlib.animation as animation
+import networkx as nx
 
 ## Algoritmos a incluir : 
 ## > Flujo maximo
 ## > Prim or Kruskal
+
+infinito = 1000000000
 
 # Creamos la ventana de la aplicacion
 window = tk.Tk()
@@ -16,19 +22,52 @@ def limpiar_pantalla():
     for widgets in window.winfo_children():
         widgets.destroy()
 
+def dibujar_grafo(adj):
+    limpiar_pantalla()
+
+    G = nx.Graph()
+
+    # Recorremos la matrix de adyacencia
+
+    for key in adj.keys():
+        b = adj[key]
+        i = 1
+
+        for item in b :
+            # Si hay un camino valido lo agregamos
+            if item != infinito:
+                G.add_edge(key, i, weight=item);
+            i += 1
+
+
+    # set up the figure and axes
+    fig, ax = plt.subplots()
+
+    # draw the graph
+    pos = nx.spring_layout(G)
+    nx.draw(G, pos, with_labels=True, font_weight='bold')
+    labels = nx.get_edge_attributes(G, 'weight')
+    nx.draw_networkx_edge_labels(G, pos, edge_labels=labels)
+
+    # create a FigureCanvasTkAgg widget to display the Matplotlib figure
+    canvas = FigureCanvasTkAgg(fig, master=window)
+    canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=True)
+
+
+
+
+
 def iniciar_flujo(adj, inicial, final):
     # En caso de que no haya ningun dato cuando se pide el nodo inicial y final, cerramos completamente el programa
     if (len(inicial) == 0 or len(final) == 0) :
         window.destroy()
         return ''
 
+    limpiar_pantalla()
 
-    print(inicial)
-    print(final)
-
-    for k,v  in adj.items():
-        print(k, ' : ', v)
-
+    # Creamos el grafp
+    dibujar_grafo(adj)
+    
 def get_data(s, opcion):
     # En caso de que no haya ningun dato cuando se pide la matriz, cerramos completamente el programa
     if (len(s) == 0) :
@@ -44,7 +83,7 @@ def get_data(s, opcion):
         limpiar_pantalla()
 
         # Creamos la entiqueta y el campo de entrada para el nodo inicial
-        nodoInicial_label = tk.Label(window, text="Nodo inicial :", font='helvetica 18 bold')
+        nodoInicial_label = tk.Label(window, text="Nodo inicial :", font='helvetica 20')
         nodoInicial_entry = tk.Entry(window)
 
         # Los agregamos a pantalla
@@ -52,7 +91,7 @@ def get_data(s, opcion):
         nodoInicial_entry.pack(padx=(100,100), pady=(0,100))
 
         # Creamos la entiqueta y el campo de entrada para el nodo final
-        nodoFinal_label = tk.Label(window, text="Nodo final :", font='helvetica 18 bold')
+        nodoFinal_label = tk.Label(window, text="Nodo final :", font='helvetica 20')
         nodoFinal_entry = tk.Entry(window)
 
         # Los agregamos a pantalla
