@@ -9,6 +9,7 @@ def crear_adjList(entrada):
 
     for i in temp : 
         a = i.split('|')
+        a[1] = a[1].split(' ')
         b = []
 
         for j in range (0, len(a[1])):
