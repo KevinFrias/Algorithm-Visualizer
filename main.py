@@ -118,14 +118,22 @@ def iniciar_flujo(adj, inicial, final):
         window.destroy()
         return ''
 
+    inicial = int(inicial)
+    final = int(final)
 
     # Limpiamos la pantalla para poder mostrar toda la información necesaria (El grafo, botones para mostar los pasos del algoritmo y la respuesta)
     limpiar_pantalla()
     graph,canvas,position_graph = iniciar_grafo(adj)
+
+    for k,v in adj.items() :
+        print (k, ' : ', v)
+    
+    print()
+    print()
+    
+
     #### -------------------------------------------------------------------- ###
-    caminos = flujo.completo(adj)
-
-
+    caminos = flujo.completo(adj, inicial, final)
 
     # Create the first button and add it to the top of the frame
     Siguiente_boton = tk.Button(window, width=35, height=3, text="Anterior", command= lambda: modificar_grafo(graph, canvas, position_graph))
