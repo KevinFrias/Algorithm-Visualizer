@@ -1,5 +1,6 @@
 import tkinter as tk
 import helping_functions as hf
+import flujo
 
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import matplotlib.pyplot as plt
@@ -14,35 +15,26 @@ import time
 ## > Flujo maximo
 ## > Prim or Kruskal
 
-infinito = 1000000000
-
 # Creamos la ventana de la aplicacion
 window = tk.Tk()
 window.title("Visualización")
 window.geometry("800x600")
 window.resizable(False, False)
 
+# Declaramos la varaibles necesarias para poder dibujar el grafo
+fig, ax = plt.subplots()
+
 def limpiar_pantalla():
     # Limpiamos la pantalla
     for widgets in window.winfo_children():
         widgets.destroy()
 
-# set up the figure and axes
-fig, ax = plt.subplots()
-
 def iniciar_grafo(adj):
     G = nx.Graph()
-
-    # Recorremos la matrix de adyacencia para poder dibujarlo
-    for key in adj.keys():
-        b = adj[key]
-        i = 1
-        for item in b :
-            # Si hay un camino valido lo agregamos
-            if item != infinito:
-                G.add_edge(key, i, weight=item);
-            i += 1
-
+    
+    for k,v in adj.items() :
+        for i in v :
+            G.add_edge(k,i[0], weight=i[1])
 
     for n in G.nodes:
         G.nodes[n]["visible"] = True
@@ -52,7 +44,6 @@ def iniciar_grafo(adj):
 
 
     position_graph = nx.spring_layout(G)
-
 
     nx.draw(G, position_graph, with_labels=True, font_weight='bold')
     labels = nx.get_edge_attributes(G, 'weight')
@@ -64,12 +55,13 @@ def iniciar_grafo(adj):
 
     return G,canvas, position_graph
 
+
+
 def modificar_grafo(G, canvas, position_graph):
 
+    '''
     ax.clear()  
     fig.clear()
-
-    #pos = nx.spring_layout(G)
 
     # Set the node's visibility to False
     G.nodes[2]["visible"] = False
@@ -106,17 +98,18 @@ def modificar_grafo(G, canvas, position_graph):
     print(labels)
 
     nx.draw_networkx_edge_labels(G,position_graph, edge_labels=labels)
-
+    '''
 
     '''
     G.remove_node(6)
     nx.draw(G, pos, with_labels=True, font_weight='bold')
     labels = nx.get_edge_attributes(G, 'weight')
     nx.draw_networkx_edge_labels(G, pos, edge_labels=labels)
-    '''
 
     canvas.draw()
     canvas.get_tk_widget().update()
+    '''
+
 
 
 def iniciar_flujo(adj, inicial, final):
@@ -125,9 +118,14 @@ def iniciar_flujo(adj, inicial, final):
         window.destroy()
         return ''
 
+
     # Limpiamos la pantalla para poder mostrar toda la información necesaria (El grafo, botones para mostar los pasos del algoritmo y la respuesta)
     limpiar_pantalla()
     graph,canvas,position_graph = iniciar_grafo(adj)
+    #### -------------------------------------------------------------------- ###
+    caminos = flujo.completo(adj)
+
+
 
     # Create the first button and add it to the top of the frame
     Siguiente_boton = tk.Button(window, width=35, height=3, text="Anterior", command= lambda: modificar_grafo(graph, canvas, position_graph))
