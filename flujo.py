@@ -2,15 +2,16 @@
 # profundidad (DFS) para conseguir todos los caminos de
 
 def obtener_camino(graph, start, end, path = [], weight = 1000000, visited=set()):
+
+    if (path == []):
+        visited.clear()
+        
     if start == end:
         return path, weight
 
     visited.add(start)
 
     for neighbor, w in graph[start]:
-        
-        print(graph[start])
-
         if neighbor not in visited:
             visited.add(neighbor)
             new_path, min_weight = obtener_camino(graph, neighbor, end, path + [(start, neighbor)], min(weight, w), visited)
@@ -27,13 +28,17 @@ def completo(graph, inicio, final):
 
     while (True) :
 
-        print('asjdbajksb')
+        for k,v in graph.items() :
+                print (k, ' : ', v)
+        print()
+
         camino, peso_minimo = obtener_camino(graph, inicio, final)
 
         if (peso_minimo == -1) :
             break
         else:
             print(camino, ' - ', peso_minimo)
+            print()
             print()
 
             caminos.append((camino, peso_minimo))
@@ -44,7 +49,6 @@ def completo(graph, inicio, final):
 
                 for dest, w in temp :
                     if (dest == v) :
-
                         w = w - peso_minimo
                         if (w) : 
                             new_data.append((dest, w))
@@ -53,10 +57,18 @@ def completo(graph, inicio, final):
 
                 graph[u] = new_data
 
+            for u,v in camino :
+                temp = graph[v]
+                new_data = []
 
-            for k,v in graph.items() :
-                print (k, ' : ', v)
+                for (dest, w) in temp :
+                    if (dest == u) :
+                        w = w - peso_minimo
+                        if (w) :
+                            new_data.append((dest,w))
+                    else :
+                        new_data.append((dest, w))
 
-
-
+                graph[v] = new_data
+            
     return caminos

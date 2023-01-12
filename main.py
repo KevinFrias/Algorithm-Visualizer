@@ -125,13 +125,6 @@ def iniciar_flujo(adj, inicial, final):
     limpiar_pantalla()
     graph,canvas,position_graph = iniciar_grafo(adj)
 
-    for k,v in adj.items() :
-        print (k, ' : ', v)
-    
-    print()
-    print()
-    
-
     #### -------------------------------------------------------------------- ###
     caminos = flujo.completo(adj, inicial, final)
 
