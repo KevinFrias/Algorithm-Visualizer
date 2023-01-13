@@ -11,8 +11,6 @@ import atexit
 import threading
 import time
 
-infinito = 10000000000
-
 ## Algoritmos a incluir : 
 ## > Flujo maximo
 ## > Prim or Kruskal
@@ -31,59 +29,78 @@ def limpiar_pantalla():
     for widgets in window.winfo_children():
         widgets.destroy()
 
-def iniciar_grafo(adj):
+def iniciar_grafo(adj, inicial, final):
     G = nx.Graph()
     
     for k,v in adj.items() :
         for i in v :
             G.add_edge(k,i[0], weight=i[1])
 
+    # La siguiente linea nos ayuda a medir la distancia entre nodo y nodo, esto nos ayuda posteriormente a mantener en su lugar geometrico
+    # la posicion de toda la información del grafo y poder modificarlo
     position_graph = nx.spring_layout(G)
 
     widths = [2 for u,v in G.edges()]
+    node_colors = ['blue' if n == inicial or n == final else 'white' for n in G.nodes()]
     node_sizes = [800 for n in G.nodes()]
     labels = nx.get_edge_attributes(G, 'weight')
 
-    nx.draw(G, position_graph, with_labels=True, font_weight='bold', width=widths, node_size=node_sizes)
-    nx.draw_networkx_edge_labels(G, position_graph, edge_labels=labels)
+    nx.draw(G, position_graph, with_labels=True, font_weight='bold', width=widths, node_size=node_sizes, node_color=node_colors)
+    nx.draw_networkx_edge_labels(G, position_graph, edge_labels=labels, font_size=11)
 
-    # create a FigureCanvasTkAgg widget to display the Matplotlib figure
+    # create a FigureCanvasTkAgg widget para poder mostrar correctamente el grafo
     canvas = FigureCanvasTkAgg(fig, master=window)
     canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=True)
 
     return G,canvas, position_graph
 
+def mostrar_camino_flujo(G, canvas, valor_minimo, camino_actual, inicial, final, position_graph):
 
-
-def mostrar_camino(G, canvas, camino_actual, inicial, final, position_graph):
-
+    # Creamos un par de listas que nos ayudaran a saber por que aristas y nodos hemos pasado para poder cambiar su color correctamente
     pasados  = []
     arista_pasada = []
 
     for i in camino_actual :
+        # Limpiamos la figura en pantalla
         ax.clear()
         fig.clear()
+
+        # Agregamos los nodos que estamos ocuando 
         pasados.append(i[0])
         pasados.append(i[1])
 
+        # Agregamos la arista que ocupamos
         arista_pasada.append((i))
 
+        # En la siguiente para de lineas cambiamos el color de los nodos y aristas dependiendo de varias condiciones
         node_colors = ['blue' if n == inicial or n == final else 'red' if n in pasados else 'white' for n in G.nodes()]
-        edge_colors = ['red' if (u,v) in arista_pasada or (v,u) in arista_pasada else 'black' for u,v in G.edges()]
+        edge_colors = ['red' if (u,v) in arista_pasada or (v,u) in arista_pasada else '#F3F3F3' if G[u][v]['weight'] == 0 else 'black'   for u,v in G.edges()]
 
+        # Asignamos un tamaño para los nodos
         node_sizes = [800 for n in G.nodes()]
+
+        # Asignamos un tañano para las aristas
         widths = [3 if (u,v) == i or (v,u) == i else 2 for u,v in G.edges()]
         labels = nx.get_edge_attributes(G, 'weight')
 
-
+        # Dibujamos el grafo y pasando como parametro toda la información necesaria para su representacion
         nx.draw(G, position_graph, with_labels=True, font_weight='bold', edge_color=edge_colors, node_color=node_colors, width= widths, node_size=node_sizes)
-        nx.draw_networkx_edge_labels(G, position_graph, edge_labels=labels)
+        nx.draw_networkx_edge_labels(G, position_graph, edge_labels=labels, font_size=11)
 
         canvas.draw()
         canvas.get_tk_widget().update()
 
         time.sleep(1.5)
 
+    # Despues que mostramos el camino se tiene que cambiar el peso de las aristas del camino recorrido
+    weights = nx.get_edge_attributes(G,'weight')
+    for u,v in weights:
+        if (u,v) in camino_actual or (v,u) in camino_actual :
+            weights[(u,v)] -= valor_minimo
+    
+    nx.set_edge_attributes(G, weights, 'weight')
+
+    return G
 
 def iniciar_flujo(adj, inicial, final):
     # En caso de que no haya ningun dato cuando se pide el nodo inicial y final, cerramos completamente el programa
@@ -96,46 +113,47 @@ def iniciar_flujo(adj, inicial, final):
 
     # Limpiamos la pantalla para poder mostrar toda la información necesaria (El grafo, botones para mostar los pasos del algoritmo y la respuesta)
     limpiar_pantalla()
-    graph,canvas,position_graph = iniciar_grafo(adj)
-
-
+    graph,canvas,position_graph = iniciar_grafo(adj, inicial, final)
 
     #### -------------------------------------------------------------------- ###
 
     caminos = flujo.completo(adj, inicial, final)
 
-    ## Para hacer update al grafo, primero hay que hacer de color diferente la arista. de cado de el camino
-    ## Despues de que hacemos todo el camino, regresamos al color original
-    ## Poner el peso actualizado
-    ## Si alguno de esos pesos ya no lo podemos ocupar, entonces marcamos de color diferente esa arista
+    # Etiqueta que nos ayudara para mostrar el valor minimo del camino que se tomó
+    Info = tk.Label(height = 3, text = "", font='helvetica 14')
+    Info.pack(side=tk.LEFT, expand=True)
+
+    # Etiqueta donde mostraremos el resultado del algoritmo camino por camino
+    Resultado = tk.Label(height = 3, text = "Resultado : 0", font='helvetica 14')
+    Resultado.pack(side=tk.LEFT, expand=True)
+
+    # La siguiente variable nos ayudara a mostrar el resultado 
+    resultado_algoritmo = 0
 
     for i in range (0, len(caminos)):
+        Info.config(text= "")
+
         actual = caminos[i]
 
         camino_actual = actual[0]
         valor_minimo = actual[1]
 
-        #print ('Valor minimo : ', valor_minimo, '   Camino a seguir : ', camino_actual)
-        #print()
+        graph = mostrar_camino_flujo(graph, canvas, valor_minimo, camino_actual,inicial, final, position_graph)
 
-        mostrar_camino(graph, canvas, camino_actual,inicial, final, position_graph)
-        time.sleep(2)
+        resultado_algoritmo += valor_minimo
 
+        # Mostramos la informacion relevante al camino que se tomó
+        Info.config(text = "Valor minimo : " + str(valor_minimo))
+        Resultado.config(text = "Resultado : " + str(resultado_algoritmo))
 
+        time.sleep(1)
+
+        Info.update()
+        Resultado.update()
+
+        time.sleep(1)
 
     #### -------------------------------------------------------------------- ###
-
-    '''
-    # Create the first button and add it to the top of the frame
-    Anterior_boton = tk.Button(window, width=35, height=3, text="Siguiente", command=lambda : modificar_grafo())
-    #Anterior_boton.place(x=480, y=525)
-    Anterior_boton.pack(side=tk.LEFT, expand=True)
-    '''
-
-    # Mostramos instrucciones para ingresar la matriz
-    Resultado = tk.Label(text = "00000", font='helvetica 14')
-    #Resultado.place(x=380, y=545)
-    Resultado.pack(side=tk.LEFT, expand=True)
 
 def obtener_grafo(s, opcion):
     # En caso de que no haya ningun dato cuando se pide la matriz, cerramos completamente el programa
