@@ -1,5 +1,6 @@
 import tkinter as tk
 import helping_functions as hf
+import arbolMinimo as am
 import flujo
 
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
@@ -29,7 +30,45 @@ def limpiar_pantalla():
     for widgets in window.winfo_children():
         widgets.destroy()
 
-def iniciar_grafo(adj, inicial, final):
+
+def iniciar_grafo_arbol(adj):
+    G = nx.Graph()
+    
+    for k,v in adj.items() :
+        for i in v :
+            G.add_edge(k,i[0], weight=i[1])
+
+    # La siguiente linea nos ayuda a medir la distancia entre nodo y nodo, esto nos ayuda posteriormente a mantener en su lugar geometrico
+    # la posicion de toda la información del grafo y poder modificarlo
+    position_graph = nx.spring_layout(G)
+
+    widths = [2 for u,v in G.edges()]
+    node_colors = ['#A4A4A4' for n in G.nodes()]
+    node_sizes = [800 for n in G.nodes()]
+    labels = nx.get_edge_attributes(G, 'weight')
+
+    nx.draw(G, position_graph, with_labels=True, font_weight='bold', width=widths, node_size=node_sizes, node_color=node_colors)
+    nx.draw_networkx_edge_labels(G, position_graph, edge_labels=labels, font_size=11)
+
+    # create a FigureCanvasTkAgg widget para poder mostrar correctamente el grafo
+    canvas = FigureCanvasTkAgg(fig, master=window)
+    canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=True)
+
+    return G,canvas, position_graph
+
+def iniciar_arbol_minimo(adj):
+    limpiar_pantalla()
+    iniciar_grafo_arbol(adj)
+
+    camino_nodos = am.conseguir_camino(adj)
+
+    # Etiqueta donde mostraremos el resultado conforme vayamos tomando cada nodo
+    Resultado = tk.Label(height = 3, text = "Resultado : 0", font='helvetica 14')
+    Resultado.pack(side=tk.LEFT, expand=True)
+
+
+
+def iniciar_grafo_flujo(adj, inicial, final):
     G = nx.Graph()
     
     for k,v in adj.items() :
@@ -113,7 +152,7 @@ def iniciar_flujo(adj, inicial, final):
 
     # Limpiamos la pantalla para poder mostrar toda la información necesaria (El grafo, botones para mostar los pasos del algoritmo y la respuesta)
     limpiar_pantalla()
-    graph,canvas,position_graph = iniciar_grafo(adj, inicial, final)
+    graph,canvas,position_graph = iniciar_grafo_flujo(adj, inicial, final)
 
     #### -------------------------------------------------------------------- ###
 
@@ -155,18 +194,21 @@ def iniciar_flujo(adj, inicial, final):
 
     #### -------------------------------------------------------------------- ###
 
+
+
+
 def obtener_grafo(s, opcion):
     # En caso de que no haya ningun dato cuando se pide la matriz, cerramos completamente el programa
     if (len(s) == 0) :
         window.destroy()
         return ''
 
+    # Limpiamos la entrada que fue proporcionada por el usuario, esto con una funcion de ayuda en otro archivo, para
+    # su posterior asignacion a una variable
+    adj = hf.limpiar_entrada(s)
+
     # En caso de que se haya seleccionado el algoritmo para el flujo maximo, se pediran el nodo inicial y el nodo final
     if (opcion == 1) :
-        # Limpiamos la entrada que fue proporcionada por el usuario, esto con una funcion de ayuda en otro archivo, para
-        # su posterior asignacion a una variable
-        adj = hf.limpiar_entrada(s)
-
         # Limpiamos la pnatalla para poder pedir los datos restantes para el algoritmo
         limpiar_pantalla()
 
@@ -198,6 +240,9 @@ def obtener_grafo(s, opcion):
         # Creamos un boton para volver al menu principal
         volver_boton = tk.Button(window, width=35, height=3, text="Volver", command=mostrar_menu)
         volver_boton.pack(pady = (25,25))
+
+    elif (opcion == 2) :
+        iniciar_arbol_minimo(adj)
 
 def pedir_grafo(opcion):
     limpiar_pantalla()

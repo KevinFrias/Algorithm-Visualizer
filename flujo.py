@@ -11,7 +11,7 @@ def obtener_camino(graph, start, end, path = [], weight = 1000000, visited=set()
 
     visited.add(start)
 
-    for neighbor, w in graph[start]:
+    for neighbor, w in sorted(graph[start], key=lambda x: x[1], reverse=True):
         if neighbor not in visited:
             visited.add(neighbor)
             new_path, min_weight = obtener_camino(graph, neighbor, end, path + [(start, neighbor)], min(weight, w), visited)
