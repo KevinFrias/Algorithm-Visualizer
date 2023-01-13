@@ -82,7 +82,6 @@ def mostar_arbol_minimo(adj, G, canvas, position_graph, nodos_visited, edges_vis
     canvas.draw()
     canvas.get_tk_widget().update()
 
-
 def iniciar_arbol_minimo(adj):
     limpiar_pantalla()
     graph,canvas,position_graph = iniciar_grafo_arbol(adj)
@@ -249,6 +248,8 @@ def iniciar_flujo(adj, inicial, final):
 
     #### -------------------------------------------------------------------- ###
 
+
+    mostrar_camino_flujo(graph, canvas,  0, [(inicial, inicial)], inicial, final, position_graph)
 
 
 

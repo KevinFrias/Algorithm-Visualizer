@@ -14,7 +14,7 @@ def limpiar_entrada(entrada):
 
         for j in range (0, len(a[1])):
             # Si no hay camino o algun lazo, usamos una varible la cual no tomaremos en cuenta
-            if  a[1][j] != 'x' and a[1][j] != '-' : 
+            if  len(a[1][j]) and a[1][j].isnumeric() : 
                 b.append((j+1, int(a[1][j])))
 
         indice = int(a[0])
