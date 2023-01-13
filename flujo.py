@@ -5,7 +5,7 @@ def obtener_camino(graph, start, end, path = [], weight = 1000000, visited=set()
 
     if (path == []):
         visited.clear()
-        
+
     if start == end:
         return path, weight
 
@@ -28,19 +28,11 @@ def completo(graph, inicio, final):
 
     while (True) :
 
-        for k,v in graph.items() :
-                print (k, ' : ', v)
-        print()
-
         camino, peso_minimo = obtener_camino(graph, inicio, final)
 
         if (peso_minimo == -1) :
             break
         else:
-            print(camino, ' - ', peso_minimo)
-            print()
-            print()
-
             caminos.append((camino, peso_minimo))
 
             for u,v in camino :

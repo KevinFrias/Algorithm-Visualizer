@@ -128,6 +128,15 @@ def iniciar_flujo(adj, inicial, final):
     #### -------------------------------------------------------------------- ###
     caminos = flujo.completo(adj, inicial, final)
 
+    for i in range (0, len(caminos)):
+        actual = caminos[i]
+        camino_actual = actual[0]
+        valor_minimo = actual[1]
+
+        print ('Valor minimo : ', valor_minimo, '   Camino a seguir : ', camino_actual)
+
+
+
     # Create the first button and add it to the top of the frame
     Siguiente_boton = tk.Button(window, width=35, height=3, text="Anterior", command= lambda: modificar_grafo(graph, canvas, position_graph))
     #Siguiente_boton.place(x=10, y=525)
