@@ -31,6 +31,8 @@ def limpiar_pantalla():
         widgets.destroy()
 
 
+
+
 def iniciar_grafo_arbol(adj):
     G = nx.Graph()
     
@@ -56,15 +58,68 @@ def iniciar_grafo_arbol(adj):
 
     return G,canvas, position_graph
 
+def mostar_arbol_minimo(adj, G, canvas, position_graph, nodos_visited, edges_visited):
+
+    # Limpiamos la figura en pantalla
+    ax.clear()
+    fig.clear()
+
+    # En la siguiente para de lineas cambiamos el color de los nodos y aristas dependiendo de varias condiciones
+    node_colors = ['#7e6cff' if (n in nodos_visited) else  '#F3F3F3' for n in G.nodes()]
+    edge_colors = ['#7e6cff' if (u,v) in edges_visited or (v,u) in edges_visited else '#F3F3F3' for u,v in G.edges()]
+
+    # Asignamos un tamaño para los nodos
+    node_sizes = [800 for n in G.nodes()]
+
+    # Asignamos un tañano para las aristas
+    widths = [3 if (u,v) in edges_visited or (v,u) in edges_visited else 2 for u,v in G.edges()]
+    labels = nx.get_edge_attributes(G, 'weight')
+
+    # Dibujamos el grafo y pasando como parametro toda la información necesaria para su representacion
+    nx.draw(G, position_graph, with_labels=True, font_weight='bold', edge_color=edge_colors, node_color=node_colors, width= widths, node_size=node_sizes)
+    nx.draw_networkx_edge_labels(G, position_graph, edge_labels=labels, font_size=11)
+
+    canvas.draw()
+    canvas.get_tk_widget().update()
+
+
 def iniciar_arbol_minimo(adj):
     limpiar_pantalla()
-    iniciar_grafo_arbol(adj)
+    graph,canvas,position_graph = iniciar_grafo_arbol(adj)
 
-    camino_nodos = am.conseguir_camino(adj)
+    path, pesos = am.conseguir_camino(adj)
 
     # Etiqueta donde mostraremos el resultado conforme vayamos tomando cada nodo
-    Resultado = tk.Label(height = 3, text = "Resultado : 0", font='helvetica 14')
-    Resultado.pack(side=tk.LEFT, expand=True)
+    Resultado_arbol = tk.Label(height = 3, text = "Resultado : 0", font='helvetica 14')
+    Resultado_arbol.pack(side=tk.LEFT, expand=True)
+
+    nodos_visited = []
+    edges_visited = []
+
+    indice = 0
+    resultado_algoritmo_arbol = 0
+
+    for arista in path :
+        edges_visited.append(arista)
+
+        if (arista[0] not in nodos_visited):
+            nodos_visited.append(arista[0])
+
+        if (arista[1] not in nodos_visited):
+            nodos_visited.append(arista[1])
+
+        mostar_arbol_minimo(adj, graph, canvas, position_graph, nodos_visited, edges_visited)
+
+        resultado_algoritmo_arbol += pesos[indice]
+        
+        Resultado_arbol.config(text = "Resultado : " + str(resultado_algoritmo_arbol))
+        Resultado_arbol.update()
+        indice += 1
+
+        time.sleep(1.5)
+
+
+
 
 
 
@@ -163,8 +218,8 @@ def iniciar_flujo(adj, inicial, final):
     Info.pack(side=tk.LEFT, expand=True)
 
     # Etiqueta donde mostraremos el resultado del algoritmo camino por camino
-    Resultado = tk.Label(height = 3, text = "Resultado : 0", font='helvetica 14')
-    Resultado.pack(side=tk.LEFT, expand=True)
+    Resultado_flujo = tk.Label(height = 3, text = "Resultado : 0", font='helvetica 14')
+    Resultado_flujo.pack(side=tk.LEFT, expand=True)
 
     # La siguiente variable nos ayudara a mostrar el resultado 
     resultado_algoritmo = 0
@@ -183,12 +238,12 @@ def iniciar_flujo(adj, inicial, final):
 
         # Mostramos la informacion relevante al camino que se tomó
         Info.config(text = "Valor minimo : " + str(valor_minimo))
-        Resultado.config(text = "Resultado : " + str(resultado_algoritmo))
+        Resultado_flujo.config(text = "Resultado : " + str(resultado_algoritmo))
 
         time.sleep(1)
 
         Info.update()
-        Resultado.update()
+        Resultado_flujo.update()
 
         time.sleep(1)
 
