@@ -47,3 +47,53 @@ def ordenar_grafo_increasing(graph) :
     resultado = {i: resultado[i] for i in myKeys}
 
     return resultado
+
+
+def limpiar_tabla(entrada):
+    temp = entrada.split('\n')
+    respuesta = []
+
+    for i in temp :
+        respuesta.append(i.split(' '))
+
+    return respuesta
+
+    respuesta_transverse = {}
+    temp2 = []
+
+    for i in range(0, len(respuesta[0])) :
+        b = []
+        for j in range (0, len(respuesta)) :
+            b.append(respuesta[j][i])
+        respuesta_transverse[i] = b
+        temp2.append(b)
+
+    return temp2
+
+def imprimir_tabla (tabla):
+
+    for i in range (0, len(tabla)):
+        for j in range (0, len(tabla[i])):
+                if (j == len(tabla[i]) - 1) :
+                    print ('  | ', end = ' ')
+                print (tabla[i][j], end = ' ')
+
+        if (i == len(tabla[i]) - 2) :
+            print()
+            for x in range (0, len(tabla[i])):
+                print ('-', end= '')
+
+        print()
+
+
+
+def esquina_noroeste(tabla):
+    x, y = 0,0
+    respuesta = 0
+
+    imprimir_tabla(tabla)
+
+    last_x = len(tabla[0]) - 1
+    last_y = len(tabla) - 1
+
+

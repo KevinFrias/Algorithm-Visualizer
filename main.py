@@ -1,4 +1,7 @@
 import tkinter as tk
+from tkinter import ttk
+import pandas as pd
+
 import helping_functions as hf
 import arbolMinimo as am
 import flujo
@@ -119,9 +122,6 @@ def iniciar_arbol_minimo(adj):
 
 
 
-
-
-
 def iniciar_grafo_flujo(adj, inicial, final):
     G = nx.Graph()
     
@@ -134,7 +134,7 @@ def iniciar_grafo_flujo(adj, inicial, final):
     position_graph = nx.spring_layout(G)
 
     widths = [2 for u,v in G.edges()]
-    node_colors = ['blue' if n == inicial or n == final else 'white' for n in G.nodes()]
+    node_colors = ['blue' if n == inicial or n == final else '#E9E9E9' for n in G.nodes()]
     node_sizes = [800 for n in G.nodes()]
     labels = nx.get_edge_attributes(G, 'weight')
 
@@ -166,7 +166,7 @@ def mostrar_camino_flujo(G, canvas, valor_minimo, camino_actual, inicial, final,
         arista_pasada.append((i))
 
         # En la siguiente para de lineas cambiamos el color de los nodos y aristas dependiendo de varias condiciones
-        node_colors = ['blue' if n == inicial or n == final else 'red' if n in pasados else 'white' for n in G.nodes()]
+        node_colors = ['blue' if n == inicial or n == final else 'red' if n in pasados else '#E9E9E9' for n in G.nodes()]
         edge_colors = ['red' if (u,v) in arista_pasada or (v,u) in arista_pasada else '#F3F3F3' if G[u][v]['weight'] == 0 else 'black'   for u,v in G.edges()]
 
         # Asignamos un tamaño para los nodos
@@ -252,6 +252,51 @@ def iniciar_flujo(adj, inicial, final):
     mostrar_camino_flujo(graph, canvas,  0, [(inicial, inicial)], inicial, final, position_graph)
 
 
+def iniciar_tabla(input, opcion):
+    limpiar_pantalla()
+
+    data = hf.limpiar_tabla(input)
+
+    hf.imprimir_tabla(data)
+
+    # Creating a dataframe
+    df = pd.DataFrame(data)
+    
+    tree = ttk.Treeview(window, show='')
+
+    # Creating the columns
+    tree["columns"] = list(range(len(df.columns)))
+
+    # Setting the column headings
+    for col, col_name in enumerate(df.columns):
+        tree.heading(col, text=col_name)
+
+    # Adding the data to the treeview
+    for i, row in df.iterrows():
+        tree.insert("", "end", iid=i, values=list(row))
+        
+    style = ttk.Style()
+    style.configure("Treeview", font=('Helvetica', 14), fieldbackground="", padding=5)
+    tree.configure(style="Treeview")
+
+    # Packaging the treeview
+    tree.pack(pady=(100,0)) 
+
+
+def iniciar_pert(graph, inicial, final, opcion) :
+     # En caso de que no haya ningun dato cuando se pide el nodo inicial y final, cerramos completamente el programa
+    if (len(inicial) == 0 or len(final) == 0) :
+        window.destroy()
+        return ''
+
+    inicial = int(inicial)
+    final = int(final)
+
+    # Limpiamos la pantalla para poder mostrar toda la información necesaria (El grafo, botones para mostar los pasos del algoritmo y la respuesta)
+    limpiar_pantalla()
+    
+    graph, canvas, position_graph = iniciar_grafo_flujo(graph, inicial, final)
+
 
 def obtener_grafo(s, opcion):
     # En caso de que no haya ningun dato cuando se pide la matriz, cerramos completamente el programa
@@ -264,7 +309,7 @@ def obtener_grafo(s, opcion):
     adj = hf.limpiar_entrada(s)
 
     # En caso de que se haya seleccionado el algoritmo para el flujo maximo, se pediran el nodo inicial y el nodo final
-    if (opcion == 1) :
+    if (opcion == 1 or opcion == 3) :
         # Limpiamos la pnatalla para poder pedir los datos restantes para el algoritmo
         limpiar_pantalla()
 
@@ -288,9 +333,26 @@ def obtener_grafo(s, opcion):
         nodoFinal_label.pack()
         nodoFinal_entry.pack(padx=(100,100), pady=(10,50))
 
-        # Creamos el boton para iniciar con el algoritmo, el cual mandara a llamar una funcion con los parametros de entrada del usuario
-        confirmar_boton = tk.Button(window, width=35, height=3, text="Iniciar", command=lambda:iniciar_flujo(adj, nodoInicial_entry.get(), nodoFinal_entry.get()))
-        confirmar_boton.pack(pady = (25,25))
+        if (opcion == 1) :
+            # Creamos el boton para iniciar con el algoritmo, el cual mandara a llamar una funcion con los parametros de entrada del usuario
+            confirmar_boton = tk.Button(window, width=35, height=3, text="Iniciar", command=lambda:iniciar_flujo(adj, nodoInicial_entry.get(), nodoFinal_entry.get()))
+            confirmar_boton.pack(pady = (25,25))
+
+        if (opcion == 3) :
+
+            var = tk.IntVar()
+
+            # Ponemos la opcion para saber la opcion que se Eliga
+            R1 = tk.Radiobutton(window, text="Maximizar", font=('Georgia 20'), variable=var, value=1)
+            R1.pack()
+
+            R2 = tk.Radiobutton(window, text="Minimizar", font=('Georgia 20'), variable=var, value=2)
+            R2.pack()
+
+            # Creamos el boton para iniciar con el algoritmo, el cual mandara a llamar una funcion con los parametros de entrada del usuario
+            confirmar_boton = tk.Button(window, width=35, height=3, text="Iniciar", command=lambda:iniciar_pert(adj, nodoInicial_entry.get(), nodoFinal_entry.get(), var.get()))
+            confirmar_boton.pack(pady = (25,25))
+
 
 
         # Creamos un boton para volver al menu principal
@@ -300,49 +362,74 @@ def obtener_grafo(s, opcion):
     elif (opcion == 2) :
         iniciar_arbol_minimo(adj)
 
-def pedir_grafo(opcion):
+def pedir_datos(opcion):
     limpiar_pantalla()
 
-    # Mostramos instrucciones para ingresar la matriz
-    label1 = tk.Label(text = "Ingresar la matriz de adyacencia de manera :", font='helvetica 14')
-    label1.pack()
+    # La siguiente condicional es para saber si fue seleccionado un algoritmo en el que se ocupe un grafo
+    if opcion == 1 or opcion == 2 or opcion == 3:
+        # Mostramos instrucciones para ingresar la matriz
+        label1 = tk.Label(text = "Ingresar la matriz de adyacencia de manera :", font='helvetica 14')
+        label1.pack()
 
-    label2 = tk.Label(text = "NODO ORIGEN" + "  |  NODO(S) DESTINO", font='Helvetica 12 bold' )
-    label2.pack()
-    
-    label3 = tk.Label(text = "*Usar espacio entre cada nodo destino, se ignorarán los lazos y marcar con una x si no hay vertice", font = 'Helvetica 11')
-    label3.pack()
+        label2 = tk.Label(text = "NODO ORIGEN" + "|NODO(S) DESTINO", font='Helvetica 12 bold' )
+        label2.pack()
+        
+        label3 = tk.Label(text = "*Usar espacio entre cada nodo destino, se ignorarán los lazos y marcar con una x si no hay vertice", font = 'Helvetica 11')
+        label3.pack()
 
-    #Pedimos la lista de adyacencia
-    input_grafo = tk.Text(window, height = 18, width = 68, bg = "white")
-    input_grafo.pack()
+        #Pedimos la lista de adyacencia
+        input_grafo = tk.Text(window, height = 12, width = 45, bg = "white", font=('Georgia 18') )
+        input_grafo.pack()
 
-    # Creamos el boton para iniciar con el algoritmo
-    confirmar_boton = tk.Button(window, width=35, height=3, text="OK", command=lambda:obtener_grafo(input_grafo.get("1.0",'end-1c'), opcion))
-    confirmar_boton.pack(side="top", expand=True)
+        # Creamos el boton para iniciar con el algoritmo
+        confirmar_boton = tk.Button(window, width=35, height=3, text="OK", command=lambda:obtener_grafo(input_grafo.get("1.0",'end-1c'), opcion))
+        confirmar_boton.pack(side="top", expand=True)
 
 
-    # Creamos un boton para volver al menu principal
-    volver_boton = tk.Button(window, width=35, height=3, text="Volver", command=mostrar_menu)
-    volver_boton.pack(side="bottom", expand=True)
+        # Creamos un boton para volver al menu principal
+        volver_boton = tk.Button(window, width=35, height=3, text="Volver", command=mostrar_menu)
+        volver_boton.pack(side="bottom", expand=True)
+
+    else :
+        # Mostramos instrucciones para ingresar la matriz
+        label1 = tk.Label(text = "Ingresar los datos de la tabla:", font='helvetica 14')
+        label1.pack()
+
+        label2 = tk.Label(text = "*Usar espacio entre cada uno de los datos", font = 'Helvetica 11')
+        label2.pack()
+
+        #Pedimos la lista de adyacencia
+        input_tabla = tk.Text(window, height = 12, width = 45, bg = "white", font=('Georgia 18') )
+        input_tabla.pack()
+
+        # Creamos el boton para iniciar con el algoritmo
+        confirmar_boton = tk.Button(window, width=35, height=3, text="OK", command=lambda:iniciar_tabla(input_tabla.get("1.0",'end-1c'), opcion))
+        confirmar_boton.pack(side="top", expand=True)
+
+
+        # Creamos un boton para volver al menu principal
+        volver_boton = tk.Button(window, width=35, height=3, text="Volver", command=mostrar_menu)
+        volver_boton.pack(side="bottom", expand=True)
+        
+
 
 def mostrar_menu():   
     limpiar_pantalla()
     
     # Create the first button and add it to the top of the frame
-    arbolMinimo_boton = tk.Button(window, width=35, height=3, text="Flujo máximo", command=lambda:pedir_grafo(1))
-    arbolMinimo_boton.pack(side="top", expand=True)
-
-    # Create the second button and add it below the first button
-    flujoMaximo_boton = tk.Button(window, width=35, height=3, text="Árbol mínimo", command=lambda:pedir_grafo(2))
+    flujoMaximo_boton = tk.Button(window, width=35, height=3, text="Flujo máximo", command=lambda:pedir_datos(1))
     flujoMaximo_boton.pack(side="top", expand=True)
 
+    # Create the second button and add it below the first button
+    arbolMinimo_boton = tk.Button(window, width=35, height=3, text="Árbol mínimo", command=lambda:pedir_datos(2))
+    arbolMinimo_boton.pack(side="top", expand=True)
+
     # Create the third button and add it below the second button
-    button3 = tk.Button(window, width=35, height=3, text="Extra 1")
+    button3 = tk.Button(window, width=35, height=3, text="PERT probabilistico", command=lambda:pedir_datos(3))
     button3.pack(side="top", expand=True)
 
     # Create the fourth button and add it below the third button
-    button4 = tk.Button(window, width=35, height=3, text="Extra 2")
+    button4 = tk.Button(window, width=35, height=3, text="Extra 1")
     button4.pack(side="top", expand=True)
 
 
