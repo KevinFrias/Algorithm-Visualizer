@@ -22,7 +22,6 @@ def limpiar_entrada(entrada):
 
     return adj 
 
-
 def ordenar_grafo_increasing(graph) :
     # Primero creamos un diccionario para poder acomodar los datos de manera que
     # la llave sea el peso y los valores, las aristas
@@ -84,8 +83,6 @@ def imprimir_tabla (tabla):
                 print ('-', end= '')
 
         print()
-
-
 
 def esquina_noroeste(tabla):
     x, y = 0,0

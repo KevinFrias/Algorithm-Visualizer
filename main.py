@@ -35,7 +35,6 @@ def limpiar_pantalla():
 
 
 
-
 def iniciar_grafo_arbol(adj):
     G = nx.Graph()
     
@@ -68,8 +67,8 @@ def mostar_arbol_minimo(adj, G, canvas, position_graph, nodos_visited, edges_vis
     fig.clear()
 
     # En la siguiente para de lineas cambiamos el color de los nodos y aristas dependiendo de varias condiciones
-    node_colors = ['#7e6cff' if (n in nodos_visited) else  '#F3F3F3' for n in G.nodes()]
-    edge_colors = ['#7e6cff' if (u,v) in edges_visited or (v,u) in edges_visited else '#F3F3F3' for u,v in G.edges()]
+    node_colors = ['#7e6cff' if (n in nodos_visited) else  '#8D8D8D' for n in G.nodes()]
+    edge_colors = ['#7e6cff' if (u,v) in edges_visited or (v,u) in edges_visited else '#8D8D8D' for u,v in G.edges()]
 
     # Asignamos un tamaño para los nodos
     node_sizes = [800 for n in G.nodes()]
@@ -119,6 +118,8 @@ def iniciar_arbol_minimo(adj):
         indice += 1
 
         time.sleep(1.5)
+
+
 
 
 
@@ -183,7 +184,7 @@ def mostrar_camino_flujo(G, canvas, valor_minimo, camino_actual, inicial, final,
         canvas.draw()
         canvas.get_tk_widget().update()
 
-        time.sleep(1.5)
+        time.sleep(1.7)
 
     # Despues que mostramos el camino se tiene que cambiar el peso de las aristas del camino recorrido
     weights = nx.get_edge_attributes(G,'weight')
@@ -195,21 +196,13 @@ def mostrar_camino_flujo(G, canvas, valor_minimo, camino_actual, inicial, final,
 
     return G
 
-def iniciar_flujo(adj, inicial, final):
-    # En caso de que no haya ningun dato cuando se pide el nodo inicial y final, cerramos completamente el programa
-    if (len(inicial) == 0 or len(final) == 0) :
-        window.destroy()
-        return ''
 
-    inicial = int(inicial)
-    final = int(final)
+def iniciar_flujo(graph, canvas, position_graph, adj, inicial, final):
 
-    # Limpiamos la pantalla para poder mostrar toda la información necesaria (El grafo, botones para mostar los pasos del algoritmo y la respuesta)
-    limpiar_pantalla()
-    graph,canvas,position_graph = iniciar_grafo_flujo(adj, inicial, final)
+    # Mostramos el grafo
+    mostrar_camino_flujo(graph, canvas,  0, [(final, final)], inicial, final, position_graph)
 
-    #### -------------------------------------------------------------------- ###
-
+    # Obtenemos todos lo caminos que tenemos que seguir
     caminos = flujo.completo(adj, inicial, final)
 
     # Etiqueta que nos ayudara para mostrar el valor minimo del camino que se tomó
@@ -239,8 +232,6 @@ def iniciar_flujo(adj, inicial, final):
         Info.config(text = "Valor minimo : " + str(valor_minimo))
         Resultado_flujo.config(text = "Resultado : " + str(resultado_algoritmo))
 
-        time.sleep(1)
-
         Info.update()
         Resultado_flujo.update()
 
@@ -250,6 +241,28 @@ def iniciar_flujo(adj, inicial, final):
 
 
     mostrar_camino_flujo(graph, canvas,  0, [(inicial, inicial)], inicial, final, position_graph)
+    Info.config(text = "")
+    Resultado_flujo.config(text = "Resultado : " + str(resultado_algoritmo), foreground="red",  font='helvetica 20')
+
+
+def mostar_grafo_flujo(adj, inicial, final):
+    # En caso de que no haya ningun dato cuando se pide el nodo inicial y final, cerramos completamente el programa
+    if (len(inicial) == 0 or len(final) == 0) :
+        window.destroy()
+        return ''
+
+    inicial = int(inicial)
+    final = int(final)
+
+    # Limpiamos la pantalla para poder mostrar toda la información necesaria (El grafo, botones para mostar los pasos del algoritmo y la respuesta)
+    limpiar_pantalla()
+
+    graph, canvas, position_graph = iniciar_grafo_flujo(adj, inicial, final)
+
+    # Create the third button and add it below the second button
+    button3 = tk.Button(window, width=35, height=3, text="Iniciar", command=lambda: (button3.pack_forget(), iniciar_flujo(graph, canvas, position_graph, adj, inicial, final)))
+    button3.pack(side=tk.LEFT, expand=True)
+
 
 
 def iniciar_tabla(input, opcion):
@@ -282,7 +295,6 @@ def iniciar_tabla(input, opcion):
     # Packaging the treeview
     tree.pack(pady=(100,0)) 
 
-
 def iniciar_pert(graph, inicial, final, opcion) :
      # En caso de que no haya ningun dato cuando se pide el nodo inicial y final, cerramos completamente el programa
     if (len(inicial) == 0 or len(final) == 0) :
@@ -296,6 +308,7 @@ def iniciar_pert(graph, inicial, final, opcion) :
     limpiar_pantalla()
     
     graph, canvas, position_graph = iniciar_grafo_flujo(graph, inicial, final)
+
 
 
 def obtener_grafo(s, opcion):
@@ -335,7 +348,7 @@ def obtener_grafo(s, opcion):
 
         if (opcion == 1) :
             # Creamos el boton para iniciar con el algoritmo, el cual mandara a llamar una funcion con los parametros de entrada del usuario
-            confirmar_boton = tk.Button(window, width=35, height=3, text="Iniciar", command=lambda:iniciar_flujo(adj, nodoInicial_entry.get(), nodoFinal_entry.get()))
+            confirmar_boton = tk.Button(window, width=35, height=3, text="OK", command=lambda:mostar_grafo_flujo(adj, nodoInicial_entry.get(), nodoFinal_entry.get()))
             confirmar_boton.pack(pady = (25,25))
 
         if (opcion == 3) :
@@ -425,7 +438,7 @@ def mostrar_menu():
     arbolMinimo_boton.pack(side="top", expand=True)
 
     # Create the third button and add it below the second button
-    button3 = tk.Button(window, width=35, height=3, text="PERT probabilistico", command=lambda:pedir_datos(3))
+    button3 = tk.Button(window, width=35, height=3, text="PERT probabilistico")
     button3.pack(side="top", expand=True)
 
     # Create the fourth button and add it below the third button
