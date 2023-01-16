@@ -5,6 +5,7 @@ import helping_functions as hf
 import arbolMinimo as am
 import flujo
 import esquinaNoroeste
+import costoMinimo
 
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import matplotlib.pyplot as plt
@@ -262,7 +263,10 @@ def mostar_grafo_flujo(adj, inicial, final):
     button3.pack(side=tk.LEFT, expand=True)
 
 
-def iniciar_tabla(input, opcion):
+
+
+
+def iniciar_tabla(input):
     limpiar_pantalla()
 
     data = hf.limpiar_tabla(input)
@@ -270,7 +274,6 @@ def iniciar_tabla(input, opcion):
 
     a, b = 0, 0
     respuesta = 0
-    last_x, last_y = 0, 0
 
     while (a != -1 and b != -1) :
         limpiar_pantalla()
@@ -301,15 +304,86 @@ def iniciar_tabla(input, opcion):
         Resultado_esquina = tk.Label(height = 3, text = "Resultado : " + str(respuesta), font='helvetica 14')
         Resultado_esquina.grid()
 
-        a, b, last_x, last_y, data, respuesta_1 = esquinaNoroeste.obtener_tabla(a, b, last_x, last_y, data)
+        b, a, data, respuesta_1 = esquinaNoroeste.obtener_tabla(a, b, data)
 
         respuesta += respuesta_1
 
         window.update()
-        time.sleep(1.5)
+        time.sleep(2)
 
     
     Resultado_esquina.config(text = "Resultado : " + str(respuesta), foreground="red",  font='helvetica 20')
+
+
+def iniciar_costo_minimo(input):
+    limpiar_pantalla()
+
+    data = hf.limpiar_tabla(input)
+    elementos = hf.limpiar_tabla_coste(input)
+
+    ancho = (800//len(data[0]))//16
+
+    respuesta = 0
+
+    while (len(elementos) > 0) :
+        limpiar_pantalla()
+
+        trash, a, b = elementos[0]
+
+        for x in range(len(data)):
+            for y in range(len(data[x])):
+                frameGrid = tk.Frame(window, relief=tk.RIDGE, borderwidth=3)
+                frameGrid.grid(row=x, column=y, padx=(10,10), pady=(10,20))
+
+                if (x == a and y == b) :
+                    labelGrid = tk.Label(master=frameGrid, text=f"{data[x][y]}", width=ancho, height=1, bg= "#FF3C3C", font='helvetica 14')
+                else :
+                    if (data[x][y] == 0) :
+                        labelGrid = tk.Label(master=frameGrid, text=f"{data[x][y]}", width=ancho, height=1, bg= "#323434", font='helvetica 14')
+                    else :
+                        if (x == len(data) - 1) :
+                            labelGrid = tk.Label(master=frameGrid, text=f"{data[x][y]}", width=ancho, height=1, bg= "#A0C0D0", font='helvetica 14')
+                        else :
+                            if (y == len(data[x]) - 1) :
+                                labelGrid = tk.Label(master=frameGrid, text=f"{data[x][y]}", width=ancho, height=1, bg= "#A0C0D0", font='helvetica 14')
+                            else :
+                                labelGrid = tk.Label(master=frameGrid, text=f"{data[x][y]}", width=ancho, height=1, font='helvetica 14')
+
+                labelGrid.pack()
+
+
+        # Etiqueta donde mostraremos el resultado del algoritmo paso por paso
+        Resultado_coste = tk.Label(height = 3, text = "Resultado : " + str(respuesta), font='helvetica 14')
+        Resultado_coste.grid()
+
+        data, elementos, temp = costoMinimo.paso_siguiente(a, b,  data, elementos)
+
+        respuesta += temp
+
+        window.update()
+        time.sleep(2)
+
+    for x in range(len(data)):
+        for y in range(len(data[x])):
+            frameGrid = tk.Frame(window, relief=tk.RIDGE, borderwidth=3)
+            frameGrid.grid(row=x, column=y, padx=(10,10), pady=(10,20))
+
+            if (data[x][y] == 0) :
+                labelGrid = tk.Label(master=frameGrid, text=f"{data[x][y]}", width=ancho, height=1, bg= "#323434", font='helvetica 14')
+            else :
+                if (x == len(data) - 1) :
+                    labelGrid = tk.Label(master=frameGrid, text=f"{data[x][y]}", width=ancho, height=1, bg= "#A0C0D0", font='helvetica 14')
+                else :
+                    if (y == len(data[x]) - 1) :
+                        labelGrid = tk.Label(master=frameGrid, text=f"{data[x][y]}", width=ancho, height=1, bg= "#A0C0D0", font='helvetica 14')
+                    else :
+                        labelGrid = tk.Label(master=frameGrid, text=f"{data[x][y]}", width=ancho, height=1, font='helvetica 14')
+
+            labelGrid.pack()
+
+    Resultado_coste.config(text = "Resultado : " + str(respuesta), foreground="red",  font='helvetica 20')
+
+
 
 
 
@@ -417,9 +491,14 @@ def pedir_datos(opcion):
         input_tabla = tk.Text(window, height = 12, width = 45, bg = "white", font=('Georgia 18') )
         input_tabla.pack()
 
-        # Creamos el boton para iniciar con el algoritmo
-        confirmar_boton = tk.Button(window, width=35, height=3, text="OK", command=lambda:iniciar_tabla(input_tabla.get("1.0",'end-1c'), opcion))
-        confirmar_boton.pack(side="top", expand=True)
+        if opcion == 3 :
+            # Creamos el boton para iniciar con el algoritmo
+            confirmar_boton = tk.Button(window, width=35, height=3, text="OK", command=lambda:iniciar_tabla(input_tabla.get("1.0",'end-1c')))
+            confirmar_boton.pack(side="top", expand=True)
+        else :
+            # Creamos el boton para iniciar con el algoritmo
+            confirmar_boton = tk.Button(window, width=35, height=3, text="OK", command=lambda:iniciar_costo_minimo(input_tabla.get("1.0",'end-1c')))
+            confirmar_boton.pack(side="top", expand=True)
 
 
         # Creamos un boton para volver al menu principal
@@ -444,7 +523,7 @@ def mostrar_menu():
     button3.pack(side="top", expand=True)
 
     # Create the fourth button and add it below the third button
-    button4 = tk.Button(window, width=35, height=3, text="Extra 1")
+    button4 = tk.Button(window, width=35, height=3, text="Coste Mínimo", command=lambda:pedir_datos(4))
     button4.pack(side="top", expand=True)
 
 

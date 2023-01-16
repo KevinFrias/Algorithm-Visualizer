@@ -62,14 +62,16 @@ def limpiar_tabla(entrada):
 
     return respuesta
 
-    respuesta_transverse = {}
-    temp2 = []
 
-    for i in range(0, len(respuesta[0])) :
-        b = []
-        for j in range (0, len(respuesta)) :
-            b.append(respuesta[j][i])
-        respuesta_transverse[i] = b
-        temp2.append(b)
+def limpiar_tabla_coste(entrada):
+    temp = entrada.split('\n')
+    respuesta = []
 
-    return temp2
+    for i in range (len(temp) -1):
+        a = temp[i].split(' ')
+        for j in range (len(a) - 1) :
+            respuesta.append( (int(a[j]),i, j))
+
+    respuesta  = sorted(respuesta, key=lambda x: x[0], reverse=False)
+
+    return respuesta
