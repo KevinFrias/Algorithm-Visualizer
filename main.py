@@ -1,10 +1,10 @@
 import tkinter as tk
 from tkinter import ttk
-import pandas as pd
 
 import helping_functions as hf
 import arbolMinimo as am
 import flujo
+import esquinaNoroeste
 
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import matplotlib.pyplot as plt
@@ -23,7 +23,7 @@ import time
 window = tk.Tk()
 window.title("Visualización")
 window.geometry("800x600")
-window.resizable(False, False)
+#window.resizable(False, False)
 
 # Declaramos la varaibles necesarias para poder dibujar el grafo
 fig, ax = plt.subplots()
@@ -196,7 +196,6 @@ def mostrar_camino_flujo(G, canvas, valor_minimo, camino_actual, inicial, final,
 
     return G
 
-
 def iniciar_flujo(graph, canvas, position_graph, adj, inicial, final):
 
     # Mostramos el grafo
@@ -244,7 +243,6 @@ def iniciar_flujo(graph, canvas, position_graph, adj, inicial, final):
     Info.config(text = "")
     Resultado_flujo.config(text = "Resultado : " + str(resultado_algoritmo), foreground="red",  font='helvetica 20')
 
-
 def mostar_grafo_flujo(adj, inicial, final):
     # En caso de que no haya ningun dato cuando se pide el nodo inicial y final, cerramos completamente el programa
     if (len(inicial) == 0 or len(final) == 0) :
@@ -264,50 +262,54 @@ def mostar_grafo_flujo(adj, inicial, final):
     button3.pack(side=tk.LEFT, expand=True)
 
 
-
 def iniciar_tabla(input, opcion):
     limpiar_pantalla()
 
     data = hf.limpiar_tabla(input)
+    ancho = (800//len(data[0]))//16
 
-    hf.imprimir_tabla(data)
+    a, b = 0, 0
+    respuesta = 0
+    last_x, last_y = 0, 0
 
-    # Creating a dataframe
-    df = pd.DataFrame(data)
+    while (a != -1 and b != -1) :
+        limpiar_pantalla()
+
+        for x in range(len(data)):
+            for y in range(len(data[x])):
+                frameGrid = tk.Frame(window, relief=tk.RIDGE, borderwidth=3)
+                frameGrid.grid(row=x, column=y, padx=(10,10), pady=(10,20))
+
+                if (x == a and b == y) :
+                    labelGrid = tk.Label(master=frameGrid, text=f"{data[x][y]}", width=ancho, height=1, bg= "#FF3C3C", font='helvetica 14')
+                else :
+                    if (data[x][y] == 0) :
+                        labelGrid = tk.Label(master=frameGrid, text=f"{data[x][y]}", width=ancho, height=1, bg= "#323434", font='helvetica 14')
+                    else :
+                        if (x == len(data) - 1) :
+                            labelGrid = tk.Label(master=frameGrid, text=f"{data[x][y]}", width=ancho, height=1, bg= "#A0C0D0", font='helvetica 14')
+                        else :
+                            if (y == len(data[x]) - 1) :
+                                labelGrid = tk.Label(master=frameGrid, text=f"{data[x][y]}", width=ancho, height=1, bg= "#A0C0D0", font='helvetica 14')
+                            else :
+                                labelGrid = tk.Label(master=frameGrid, text=f"{data[x][y]}", width=ancho, height=1, font='helvetica 14')
+
+                labelGrid.pack()
+
+
+        # Etiqueta donde mostraremos el resultado del algoritmo paso por paso
+        Resultado_esquina = tk.Label(height = 3, text = "Resultado : " + str(respuesta), font='helvetica 14')
+        Resultado_esquina.grid()
+
+        a, b, last_x, last_y, data, respuesta_1 = esquinaNoroeste.obtener_tabla(a, b, last_x, last_y, data)
+
+        respuesta += respuesta_1
+
+        window.update()
+        time.sleep(1.5)
+
     
-    tree = ttk.Treeview(window, show='')
-
-    # Creating the columns
-    tree["columns"] = list(range(len(df.columns)))
-
-    # Setting the column headings
-    for col, col_name in enumerate(df.columns):
-        tree.heading(col, text=col_name)
-
-    # Adding the data to the treeview
-    for i, row in df.iterrows():
-        tree.insert("", "end", iid=i, values=list(row))
-        
-    style = ttk.Style()
-    style.configure("Treeview", font=('Helvetica', 14), fieldbackground="", padding=5)
-    tree.configure(style="Treeview")
-
-    # Packaging the treeview
-    tree.pack(pady=(100,0)) 
-
-def iniciar_pert(graph, inicial, final, opcion) :
-     # En caso de que no haya ningun dato cuando se pide el nodo inicial y final, cerramos completamente el programa
-    if (len(inicial) == 0 or len(final) == 0) :
-        window.destroy()
-        return ''
-
-    inicial = int(inicial)
-    final = int(final)
-
-    # Limpiamos la pantalla para poder mostrar toda la información necesaria (El grafo, botones para mostar los pasos del algoritmo y la respuesta)
-    limpiar_pantalla()
-    
-    graph, canvas, position_graph = iniciar_grafo_flujo(graph, inicial, final)
+    Resultado_esquina.config(text = "Resultado : " + str(respuesta), foreground="red",  font='helvetica 20')
 
 
 
@@ -379,7 +381,7 @@ def pedir_datos(opcion):
     limpiar_pantalla()
 
     # La siguiente condicional es para saber si fue seleccionado un algoritmo en el que se ocupe un grafo
-    if opcion == 1 or opcion == 2 or opcion == 3:
+    if opcion == 1 or opcion == 2 :
         # Mostramos instrucciones para ingresar la matriz
         label1 = tk.Label(text = "Ingresar la matriz de adyacencia de manera :", font='helvetica 14')
         label1.pack()
@@ -438,7 +440,7 @@ def mostrar_menu():
     arbolMinimo_boton.pack(side="top", expand=True)
 
     # Create the third button and add it below the second button
-    button3 = tk.Button(window, width=35, height=3, text="PERT probabilistico")
+    button3 = tk.Button(window, width=35, height=3, text="Esquina noroeste", command=lambda:pedir_datos(3))
     button3.pack(side="top", expand=True)
 
     # Create the fourth button and add it below the third button
