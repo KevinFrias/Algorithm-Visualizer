@@ -69,5 +69,3 @@ If you encounter any issues while using this program, please open an issue in th
 
 - [NetworkX documentation](https://networkx.github.io/documentation/stable/)
 - [Matplotlib documentation](https://matplotlib.org/stable/contents.html)
-- [Tutorial on transportation problem](link)
-- [Tutorial on linear programming](link)
