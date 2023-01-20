@@ -38,12 +38,11 @@ will display the steps of each algorithm
 ![Menu Principal](./img/principal.png "Menu Principal")
 ![Datos Grafo](./img/datos_grafo.png "Datos Grafo")
 ![Nodos](./img/nodos.png "Nodo inicial y final")
-![Datos Tabla](./img/datos_tabla.png "Datos Tabla")
-
 ![Visuallizacion](./img/visualizacion1.png "Ejecución del programa")
 ![Visuallizacion](./img/visualizacion2.png "Ejecución del programa")
 ![Visuallizacion](./img/visualizacion3.png "Ejecución del programa")
 ![Visuallizacion](./img/visualizacion4.png "Ejecución del programa")
+![Datos Tabla](./img/datos_tabla.png "Datos Tabla")
 ![Visuallizacion](./img/visualizacion5.png "Ejecución del programa")
 ![Visuallizacion](./img/visualizacion6.png "Ejecución del programa")
 
