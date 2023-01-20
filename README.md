@@ -13,7 +13,7 @@ For the usage of this program it's necesary having Python installed and the foll
 
 You can install these packages by running the following command:
 
-pip install networkx matplotlib
+- pip install networkx matplotlib
 
 ## Usage
 
